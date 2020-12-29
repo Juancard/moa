@@ -4,7 +4,7 @@
   <parent>
     <groupId>nz.ac.waikato.cms.moa</groupId>
     <artifactId>moa-pom</artifactId>
-    <version>2020.07.2-SNAPSHOT</version>
+    <version>2020.12.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>moa</artifactId>
@@ -39,6 +39,17 @@
     <developer>
       <id>rkirkby</id>
       <name>Richard Kirkby</name>
+    </developer>
+    <developer>
+      <id>truong</id>
+      <name>To Dinh Truong</name>
+      <email>todinhtruong@gmail.com</email>
+      <organization>University of Waikato, CS department</organization>
+      <organizationUrl>http://www.cs.waikato.ac.nz/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+12</timezone>
     </developer>
   </developers>
 
@@ -128,6 +139,22 @@
     <artifactId>ssj</artifactId>
     <version>2.5</version>
   </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.github.yannrichet/JMathPlot -->
+    <!-- Used in FeatureAnalysis module to plot-->
+    <dependency>
+      <groupId>com.github.yannrichet</groupId>
+      <artifactId>JMathPlot</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.github.yannrichet/JMathIO -->
+    <!-- Used in FeatureAnalysis module to plot-->
+    <dependency>
+      <groupId>com.github.yannrichet</groupId>
+      <artifactId>JMathIO</artifactId>
+      <version>1.0</version>
+    </dependency>
   </dependencies>
 
   <build>
