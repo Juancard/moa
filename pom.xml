@@ -247,7 +247,7 @@
             <nohelp>true</nohelp>
             <!-- avoids "-SNAPSHOT" in title when using the release.xml configuration -->
             <doctitle>${project.name}</doctitle>
-            <additionalparam>-Xdoclint:none</additionalparam>
+            <failOnError>false</failOnError>
           </configuration>
         </plugin>
 

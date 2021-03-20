@@ -277,12 +277,12 @@
         </Component>
         <Component class="javax.swing.JButton" name="jButtonOpenConfig">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Open Experiment"/>
+            <Property name="text" type="java.lang.String" value="Open MyStreamGenerator"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="jButtonSaveConfig">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Save Experiment"/>
+            <Property name="text" type="java.lang.String" value="Save MyStreamGenerator"/>
           </Properties>
         </Component>
       </SubComponents>

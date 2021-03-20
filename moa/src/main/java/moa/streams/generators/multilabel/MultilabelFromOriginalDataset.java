@@ -19,21 +19,21 @@
  */
 package moa.streams.generators.multilabel;
 
-import java.util.*;
-import java.util.stream.IntStream;
-
-import com.yahoo.labs.samoa.instances.*;
-import moa.core.InstanceExample;
-import moa.core.MultilabelInstancesHeader;
-import moa.core.ObjectRepository;
-import moa.options.AbstractOptionHandler;
-import moa.options.ClassOption;
+import com.github.javacliparser.FileOption;
 import com.github.javacliparser.FloatOption;
 import com.github.javacliparser.IntOption;
+import com.yahoo.labs.samoa.instances.*;
+import moa.core.*;
+import moa.options.AbstractOptionHandler;
+import moa.options.ClassOption;
+import moa.streams.ArffFileStream;
 import moa.streams.InstanceStream;
 import moa.tasks.TaskMonitor;
-import moa.core.FastVector;
-import moa.core.Utils;
+
+import java.io.*;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Stream generator for multilabel data.
@@ -41,7 +41,7 @@ import moa.core.Utils;
  * @author Jesse Read ((jesse@tsc.uc3m.es))
  * @version $Revision: 7 $
  */
-public class MetaMultilabelGenerator extends AbstractOptionHandler implements InstanceStream {
+public class MultilabelFromOriginalDataset extends AbstractOptionHandler implements InstanceStream {
 
     private static final long serialVersionUID = 1L;
 
@@ -51,8 +51,9 @@ public class MetaMultilabelGenerator extends AbstractOptionHandler implements In
     public IntOption metaRandomSeedOption = new IntOption(
             "metaRandomSeed", 'm', "Random seed (for the meta process). Use two streams with the same seed and r > 0.0 in the second stream if you wish to introduce drift to the label dependencies without changing the underlying concept.", 1);
 
+
     public IntOption numLabelsOption = new IntOption(
-            "numLabels", 'c', "Number of labels.", 10, 2, Integer.MAX_VALUE);
+            "numLabels", 'l', "Number of labels.", 10, 2, Integer.MAX_VALUE);
 
     public IntOption skewOption = new IntOption(
             "skew", 'k', "Skewed label distribution: 1 (default) = yes; 0 = no (relatively uniform) @NOTE: not currently implemented.", 1, 0, 1);
@@ -68,6 +69,17 @@ public class MetaMultilabelGenerator extends AbstractOptionHandler implements In
 
     public FloatOption labelDependencyChangeRatioOption = new FloatOption(
             "labelDependencyRatioChange", 'r', "Each label-pair dependency has a 'r' chance of being modified. Use this option on the second of two streams with the same random seed (-m) to introduce label-dependence drift.", 0.0, 0.0, 1.0);
+
+    //public FileOption arffFileOption = new FileOption("arffFile", 'f',
+    //        "ARFF file to load.", null, "arff", false);
+    public FileOption conditionalMatrixCsv = new FileOption("condCsvFile", 'y', "Csv containing conditional matrix of original dataset",null,"csv",false);
+    public FileOption priorsCsv = new FileOption("priorsCsvFile", 'j', "Csv containing prior probabilities of labels in original dataset",null,"csv",false);
+
+    //public IntOption classIndexOption = new IntOption(
+    //        "classIndex",
+    //        'c',
+    //        "Class index of data. 0 for none or -1 for last attribute in file.",
+    //        -1, -1, Integer.MAX_VALUE);
 
     protected MultilabelInstancesHeader m_MultilabelInstancesHeader = null;
 
@@ -85,13 +97,60 @@ public class MetaMultilabelGenerator extends AbstractOptionHandler implements In
 
     protected HashSet m_TopCombinations[] = null;
 
+    protected Reader fileReader;
+
     @Override
     public void prepareForUseImpl(TaskMonitor monitor, ObjectRepository repository) {
         this.restart();
     }
 
+    private double[] readPriorsFile(String filePath){
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            line = br.readLine();
+            double[] priors = Arrays.stream(line.split(","))
+                    .mapToDouble(Double::valueOf)
+                    .toArray();
+            return priors;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    private double[][] readConditionalsFile(String filePath){
+        List<List<Double>> records = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                Double[] values = Arrays.stream(line.split(","))
+                        .map(Double::valueOf)
+                        .toArray(Double[]::new);
+                records.add(Arrays.asList(values));
+            }
+            double[][] array = new double[records.size()][];
+            Double[] blankArray = new Double[0];
+            for(int i=0; i < records.size(); i++) {
+                array[i] = Stream.of(records.get(i).toArray(blankArray)).mapToDouble(Double::doubleValue).toArray();
+            }
+            return array;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     @Override
     public void restart() {
+        //File f = this.arffFileOption.getFile();
+        //MultilabelArffFileStream datasetOriginal = new MultilabelArffFileStream(f.getAbsolutePath(), numLabelsOption.getValue());
 
         // The number of class labels L
         this.m_L = numLabelsOption.getValue();
@@ -141,7 +200,17 @@ public class MetaMultilabelGenerator extends AbstractOptionHandler implements In
         this.priors_norm = Arrays.copyOf(priors, priors.length);
         Utils.normalize(this.priors_norm);
 
-        // Create the feature-label mappings
+        // PRIORS FILE
+        double[] priorsFromFile = readPriorsFile(this.priorsCsv.getFile().getAbsolutePath());
+        this.priors = priorsFromFile;
+        this.priors_norm = Arrays.copyOf(priors, priors.length);
+        Utils.normalize(priors_norm);
+
+        // CONDITIONALS FILE
+        double[][] conditionalFromFile = readConditionalsFile(this.conditionalMatrixCsv.getFile().getAbsolutePath());
+        this.Conditional = conditionalFromFile;
+
+                // Create the feature-label mappings
         m_TopCombinations = getTopCombinations(m_A);
     }
 

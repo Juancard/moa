@@ -19,27 +19,25 @@
  */
 package moa.tasks;
 
+import com.github.javacliparser.FileOption;
+import com.github.javacliparser.FlagOption;
+import com.github.javacliparser.IntOption;
+import moa.core.ObjectRepository;
+import moa.options.ClassOption;
+import moa.streams.InstanceStream;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
 
-import moa.core.ObjectRepository;
-import moa.options.ClassOption;
-import com.github.javacliparser.FileOption;
-import com.github.javacliparser.FlagOption;
-import com.github.javacliparser.IntOption;
-import com.yahoo.labs.samoa.instances.InstanceImpl;
-import com.yahoo.labs.samoa.instances.InstancesHeader;
-import moa.streams.InstanceStream;
-
 /**
  * Task to output a stream to an ARFF file
  *
- * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 7 $
+ * @author
+ * @version
  */
-public class WriteStreamToARFFFile extends AuxiliarMainTask {
+public class WriteStreamToARFFFileJuanVersion extends AuxiliarMainTask {
 
     @Override
     public String getPurposeString() {
